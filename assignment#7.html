@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+    <title>Train Station Assigment</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+    <style>
+  
+ 
+
+    #info {
+        width: 860px; 
+        margin: 10px auto; 
+    }
+
+    </style>
+
+</head>
+
+
+
+<body>
+        <div class="jumbotron jumbotron-fluid">
+                <div class="container">
+                  <h1 class="display-4">Train Station </h1>
+                  <p class="lead">Lets make a train Schedule!</p>
+                </div>
+              </div>
+
+              <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Train Name</th>
+                        <th scope="col">Destination</th>
+                        <th scope="col">Frequency(min)</th>
+                        <th scope='col'>Next Arrival</th>
+                        <th scope='col'>Minutes Away</th>
+                      </tr>
+                    </thead>
+                    
+                      </tr>
+                    </tbody>
+                  </table>
+
+
+              <form id='info'>
+                    <div class="form-group">
+                    <label for="exampleTrain">Train Station</label>
+                    <input type="train" class="form-control" id="Train" placeholder="">
+                     </div>
+                     <div class="form-group">
+                    <label for="exampleInputDestination">Destination</label>
+                    <input type="destination" class="form-control" id="Destination" placeholder="">
+                    </div>
+                    <div class="form-group">
+                    <label for="exampleInputtrainstatipm">First Train Time(military time please)</label>
+                    <input type="First Train Station" class="form-control" id="Traintime" placeholder="">
+                    </div>
+                    <div class="form-group">
+                    <label for="exampleInputFrequency">Frequency</label>
+                    <input type="Frequency" class="form-control" id="Frequency" placeholder="">
+                    </div>
+                    <button type="submit" class="button">Submit</button>
+                  </form>          
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.8.6/firebase.js"></script>
+        <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+<script>
+
+  var config = {
+    apiKey: "AIzaSyCgT2kz2fPBnqL--Q4gH_6nZ0aliQRWfeA",
+    authDomain: "newproject427-f84be.firebaseapp.com",
+    databaseURL: "https://newproject427-f84be.firebaseio.com",
+    projectId: "newproject427-f84be",
+    storageBucket: "newproject427-f84be.appspot.com",
+    messagingSenderId: "342005974814"
+  };
+
+  firebase.initializeApp(config);
+     
+var database = firebase.database();
+
+
+$(function ()  {
+
+  $('#info').on('submit', function(event) {
+        event.preventDefault();
+
+        var Train = $('#Train').val();
+        var Destination = $('#Destination').val();
+        var Traintime = $('#Traintime').val();
+        var Frequency = $('#Frequency').val();
+
+  //getting the values from the forms and making sure they work       
+       /**
+        console.log(Train);
+        console.log(Destination);
+        console.log(Traintime);
+        console.log(Frequency);
+        **/
+
+//now we must send these values to firebase!!!
+    database.ref("/Assignment7").push({
+    Train: Train, 
+    Destination: Destination, 
+    Traintime: Traintime, 
+    Frequency: Frequency
+    }); 
+
+
+
+  });
+
+
+
+  database.ref("/Assignment7").orderByChild("train").on("child_added", function(snapshot) {
+    
+    // now we retrieve the values from firebase
+    var train = snapshot.val();
+    
+    /*
+    console.log(train.Train);
+    console.log(train.Destination);
+    console.log(train.Traintime);
+    console.log(train.Frequency);
+    */
+
+// the above numbers will be pushed onto the html now
+
+
+        var row = $('<tr>');
+	     	row.append($('<td>').text(train.Train));
+		    row.append($('<td>').text(train.Destination));
+        row.append($('<td>').text(train.Frequency));  
+       
+// in here use moment js to calculate next arrival and minutes away 
+        
+        var frequency = train.Frequency
+        console.log(frequency);
+
+        var firstTrain = train.Traintime; 
+        console.log(firstTrain);
+
+        var convertfirstTrain = moment(firstTrain, 'HH:mm').subtract(1, "years");
+        console.log(convertfirstTrain);
+
+        var currentTime = moment().format('HH:mm');
+        console.log(currentTime);
+
+        // the current time minus the amount year ago in minutes.....
+        var difference = moment().diff(moment(convertfirstTrain), 'minutes'); 
+        console.log(difference); 
+
+        var module = difference % frequency;
+        console.log('Remainder ' + module);
+
+        var nexttrain = frequency - module; 
+        console.log('The next train will arive in ' + nexttrain  + ' minutes'); 
+       
+        var nextarrival = moment().add(nexttrain, 'minutes').calendar();
+        console.log(nextarrival);  
+        
+        row.append($('<td>').text(nextarrival));   
+        row.append($('<td>').text(nexttrain + ' minutes')); 
+        row.append($('</tr>'));    
+        
+        $('.table').append(row);
+
+  }); 
+
+                                  
+});                        
+                                 
+</script>
+
+
+</body>
+</html>
